@@ -20,17 +20,14 @@ export default function Navbar({onOpenSidebarChange ,name}) {
     };
 
     return (
-        <nav className="bg-white shadow">
+        <nav className="bg-white shadow sticky top-0 z-50">
             <div className="px-4 py-2">
                 <div className="flex justify-between items-center">
                     <div className="flex">
                         <div className="hidden space-x-3 sm:flex">
                             <div className="px-2 py-1 bg-gray-100 hover:bg-gray-100 rounded-full cursor-pointer group transition ease-in-out hover:rotate-180" onClick={toggleSidebar}>
-                                <div className="bi bi-list group-hover:bi-person text-gray-800 text-xl group-hover:text-rose-600"></div>
+                                <div className={`${openSidebar ? 'bi-x-lg' : 'bi-list'} text-gray-800 text-xl group-hover:text-rose-600`}></div>
                             </div>
-                            <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                Dashboard
-                            </NavLink>
                         </div>
                     </div>
 

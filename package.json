@@ -20,7 +20,12 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "date-fns": "^2.30.0",
         "primeicons": "^6.0.1",
-        "primereact": "^10.0.9"
+        "primereact": "^10.0.9",
+        "react-data-table-component": "^7.5.4",
+        "react-select": "^5.8.0",
+        "styled-components": "^6.1.1",
+        "sweetalert2": "^11.10.0"
     }
 }
