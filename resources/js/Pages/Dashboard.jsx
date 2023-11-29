@@ -9,11 +9,11 @@ export default function Dashboard({ auth }) {
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
         >
             <Head title="Dashboard" />
-            <div className="py-5 px-4">
+            <div className="py-5">
                 <div className="grid grid-cols-5 gap-4">
                     <CardDashboard
                         className="from-rose-500 to-rose-300"
-                        icon="bi-list-check"
+                        icon="bi-receipt"
                         title="260"
                         subtitle="Work Order"
                     />
