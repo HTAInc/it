@@ -13,21 +13,23 @@ export default function Sidebar({openSidebar}) {
             </div>
             <MenuItem link={route('admin.dashboard')} active='admin.dashboard' openSidebar={openSidebar} text="Dashboard" icon="bi-house"/>
             <MenuLabel openSidebar={openSidebar} text="Work Orders"/>
-            <MenuItem link="" active='login' openSidebar={openSidebar} text="Work Orders" icon="bi-receipt"/>
+            <MenuItem link={route('admin.work-order.index')} active='admin.work-order.*' openSidebar={openSidebar} text="Work Order" icon="bi-receipt"/>
             <MenuLabel openSidebar={openSidebar} text="Downtime"/>
-            <MenuItem link="" active='login' openSidebar={openSidebar} text="Downtime" icon="bi-bar-chart-line"/>
-            <MenuLabel openSidebar={openSidebar} text="Assets"/>
-            <MenuItem openSidebar={openSidebar} link={route('admin.asset.index')} active='admin.asset.*' text="Assets" icon="bi-upc-scan"/>
-            <MenuItem openSidebar={openSidebar} link="" active='register' text="Accessories" icon="bi-mouse2"/>
+            <MenuItem link={route('admin.downtime.index')} active='admin.downtime.*' openSidebar={openSidebar} text="Downtime" icon="bi-bar-chart-line"/>
+            <MenuLabel openSidebar={openSidebar} text="Devices"/>
+            <MenuItem openSidebar={openSidebar} link={route('admin.device.index')} active='admin.device.*' text="Asset" icon="bi-upc-scan"/>
+            <MenuItem openSidebar={openSidebar} link="" active='register' text="Support" icon="bi-mouse2"/>
+            <MenuLabel openSidebar={openSidebar} text="Data Master"/>
             <MenuDropdown>
                 <MenuDropdown.Trigger openSidebar={openSidebar}>
                     <div className={`${openSidebar ? 'hidden':'block'}`}>Data Master</div>
                 </MenuDropdown.Trigger>
                 <MenuDropdown.Content openSidebar={openSidebar}>
+                    <MenuDropdownContent openSidebar={openSidebar} link={route('admin.user.index')} text="User" active="admin.user.*"/>
                     <MenuDropdownContent openSidebar={openSidebar} link={route('admin.category.index')} text="Category" active="admin.category.*"/>
+                    <MenuDropdownContent openSidebar={openSidebar} link={route('admin.supplier.index')} text="Supplier" active="admin.supplier.*"/>
                     <MenuDropdownContent openSidebar={openSidebar} link={route('admin.department.index')} text="Department" active="admin.department.*"/>
                     <MenuDropdownContent openSidebar={openSidebar} link={route('admin.section.index')} text="Section" active="admin.section.*"/>
-                    <MenuDropdownContent openSidebar={openSidebar} link={route('admin.supplier.index')} text="Supplier" active="admin.supplier.*"/>
                 </MenuDropdown.Content>
             </MenuDropdown>
         </div>

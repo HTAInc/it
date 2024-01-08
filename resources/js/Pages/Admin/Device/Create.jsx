@@ -7,27 +7,45 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import getSelectStyle from "@/Utility/getSelectStyle";
 import { Head, useForm } from "@inertiajs/react";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Select from 'react-select';
 import Swal from "sweetalert2";
 import { format, subYears } from 'date-fns';
+import { useData } from "@/Utility/DataProvider";
 
-export default function create({auth, categories,suppliers,users,departments}) {
+export default function create({auth, categories,suppliers,users,departments,assets}) {
+    const {
+        companyData,
+        processorData,
+        ramTypeData,
+        ramCapacityData,
+        storageTypeData,
+        storageCapacityData,
+        osTypeData,
+        osEditionData,
+        osArchitectureData,
+        statusAssetData,
+        sizeMonitorData
+    } = useData();
+
     const currentYear = new Date().getFullYear();
-    const { data, setData, post, processing, errors } = useForm({
+    const defaultStorage = { storage_type: "", storage_capacity: ""};
+    const [errors, setErrors] = useState({});
+    const { data, setData, post, processing } = useForm({
         company: '',
         category_id: '',
-        budget: '',
+        budget: currentYear,
         category_name: '',
         code: '',
         serial_number: '',
         brand: '',
+        description: '',
+        size: '',
         processor_type: '',
         processor_description: '',
         ram_type: '',
         ram_capacity: '',
-        storage_type: '',
-        storage_capacity: '',
+        storages: [defaultStorage],
         vga_card: '',
         os_type: '',
         os_edition: '',
@@ -45,18 +63,15 @@ export default function create({auth, categories,suppliers,users,departments}) {
         department_id: '',
         name:'',
         transaction_date: '',
+        asset_name:[],
     });
 
     const selectStyle = getSelectStyle();
 
-    const companyOptions = [
-        {value: 'ARSI', label: 'ARSI'},
-        {value: 'HTA', label: 'HTA'},
-        {value: 'TTA', label: 'TTA'},
-        {value: 'DCM', label: 'DCM'},
-        {value: 'RMU', label: 'RMU'},
-        {value: 'GBI', label: 'GBI'},
-    ];
+    const companyOptions = companyData.map((company) =>  ({
+        value:company.value,
+        label: company.label
+    }));
 
     const categoryOptions = categories.map((category) => ({
         value: category.id,
@@ -72,132 +87,58 @@ export default function create({auth, categories,suppliers,users,departments}) {
         label: year,
     }));
 
+    const processorOptions = processorData.map((processor) => ({
+        value:processor.value,
+        label:processor.label
+    }));
 
-    const processorOptions = [
-        {value: 'Intel Celeron', label: 'Intel Celeron'},
-        {value: 'Intel Pentium', label: 'Intel Pentium'},
-        {value: 'Intel Core Duo', label: 'Intel Core Duo'},
-        {value: 'Intel Core i3', label: 'Intel Core i3'},
-        {value: 'Intel Core i5', label: 'Intel Core i5'},
-        {value: 'Intel Core i7', label: 'Intel Core i7'},
-        {value: 'Intel Core i9', label: 'Intel Core i9'},
-        {value: 'MD Athlon', label: 'MD Athlon'},
-        {value: 'AMD Ryzen 3', label: 'AMD Ryzen 3'},
-        {value: 'AMD Ryzen 5', label: 'AMD Ryzen 5'},
-        {value: 'AMD Ryzen 7', label: 'AMD Ryzen 7'},
-        {value: 'AMD Ryzen 9', label: 'AMD Ryzen 9'},
-    ];
-
-    const ramTypeOptions = [
-        {value: 'DDR', label: 'DDR'},
-        {value: 'DDR2', label: 'DDR2'},
-        {value: 'DDR3', label: 'DDR3'},
-        {value: 'DDR4', label: 'DDR4'},
-        {value: 'DDR5', label: 'DDR5'},
-    ];
+    const ramTypeOptions = ramTypeData.map((ramType) => ({
+        value:ramType.value,
+        label:ramType.label
+    }));
     
-    const ramCapacityOptions = [
-        {value: '2GB', label: '2GB'},
-        {value: '4GB', label: '4GB'},
-        {value: '8GB', label: '8GB'},
-        {value: '16GB', label: '16GB'},
-        {value: '32GB', label: '32GB'},
-        {value: '64GB', label: '64GB'},
-        {value: '128GB', label: '128GB'},
-        {value: '256GB', label: '256GB'},
-    ];
+    const ramCapacityOptions = ramCapacityData.map((ramCapacity) => ({
+        value:ramCapacity.value,
+        label:ramCapacity.label
+    }));
     
-    const storageTypeOptions = [
-        {value: 'HDD', label: 'HDD'},
-        {value: 'SSD', label: 'SSD'},
-        {value: 'SSHD', label: 'SSHD'},
-        {value: 'NVMe SSD', label: 'NVMe SSD'},
-        {value: 'eMMC', label: 'eMMC'},
-        {value: 'RAID', label: 'RAID'},
-        {value: 'Tape Drive', label: 'Tape Drive'},
-        {value: 'Optical Drive', label: 'Optical Drive'},
-        {value: 'SD Card', label: 'SD Card'},
-        {value: 'USB Flash Drive', label: 'USB Flash Drive'},
-    ];
+    const storageTypeOptions = storageTypeData.map((storageType) => ({
+        value:storageType.value,
+        label:storageType.label,
+    }));
 
-    const storageCapacityOptions = [
-        {value: '128GB', label: '128GB'},
-        {value: '256GB', label: '256GB'},
-        {value: '500GB', label: '500GB'},
-        {value: '1TB', label: '1TB'},
-        {value: '2TB', label: '2TB'},
-        {value: '4TB', label: '4TB'},
-        {value: '8TB', label: '8TB'},
-        {value: '16TB', label: '16TB'},
-        {value: '32TB', label: '32TB'},
-        {value: '64TB', label: '64TB'},
-    ];
+    const storageCapacityOptions = storageCapacityData.map((storageCapacity) => ({
+        value:storageCapacity.value,
+        label:storageCapacity.label,
+    }));
 
-    const osTypeOptions = [
-        {value: 'Windows XP', label: 'Windows XP'},
-        {value: 'Windows 7', label: 'Windows 7'},
-        {value: 'Windows 8', label: 'Windows 8'},
-        {value: 'Windows 10', label: 'Windows 10'},
-        {value: 'Windows 11', label: 'Windows 11'},
-        {value: 'Windows Server', label: 'Windows Server'},
-        {value: 'macOS Big Sur', label: 'macOS Big Sur'},
-        {value: 'macOS Catalina', label: 'macOS Catalina'},
-        {value: 'macOS Mojave', label: 'macOS Mojave'},
-        {value: 'Linux Ubuntu', label: 'Linux Ubuntu'},
-        {value: 'Linux Fedora', label: 'Linux Fedora'},
-        {value: 'Linux Debian', label: 'Linux Debian'},
-        {value: 'Linux CentOS', label: 'Linux CentOS'},
-        {value: 'Unix', label: 'Unix'},
-        {value: 'Android', label: 'Android'},
-        {value: 'iOS', label: 'iOS'},
-        {value: 'Chrome OS', label: 'Chrome OS'},
-        {value: 'FreeBSD', label: 'FreeBSD'},
-        {value: 'Solaris', label: 'Solaris'},
-    ];
+    const osTypeOptions = osTypeData.map((osType) => ({
+        value:osType.value,
+        label:osType.label,
+    }));
 
-    const osEditionsOptions = {
-        'Windows XP': ['Home', 'Professional'],
-        'Windows 7': ['Home Basic', 'Home Premium', 'Professional', 'Ultimate'],
-        'Windows 8': ['Standard', 'Pro', 'Enterprise'],
-        'Windows 10': ['Home', 'Pro', 'Enterprise'],
-        'Windows 11': ['Home', 'Pro', 'Enterprise'],
-        'Windows Server': ['2008', '2012', '2016', '2019'],
-        'macOS Big Sur': ['Standard Edition'],
-        'macOS Catalina': ['Standard Edition'],
-        'macOS Mojave': ['Standard Edition'],
-        'Linux Ubuntu': ['Desktop', 'Server'],
-        'Linux Fedora': ['Workstation', 'Server'],
-        'Linux Debian': ['Desktop', 'Server'],
-        'Linux CentOS': ['Desktop', 'Server'],
-        'Unix': ['Standard Edition'],
-        'Android': ['Standard Edition'],
-        'iOS': ['Standard Edition'],
-        'Chrome OS': ['Standard Edition'],
-        'FreeBSD': ['Standard Edition'],
-        'Solaris': ['Standard Edition'],
-    };
+    const osEditionsOptions = Object.fromEntries(
+        Object.entries(osEditionData).map(([os, editions]) => [os, editions])
+    );
 
     const getEditionOptions = () => {
         return data.os_type && osEditionsOptions[data.os_type]?.map((edition) => ({ value: edition, label: edition })) || [];
     };
 
-    const osArchitectureOptions = [
-        {value: '32-bit', label: '32-bit'},
-        {value: '64-bit', label: '64-bit'},
-        {value: 'Multi-bit', label: 'Multi-bit'},
-    ];
+    const osArchitectureOptions = osArchitectureData.map((osArchitecture) => ({
+        value: osArchitecture.value,
+        label: osArchitecture.label
+    }));
 
     const supplierOptions = suppliers.map((supplier) => ({
         value: supplier.id,
         label: supplier.name,
     }));
 
-    const statusOptions = [
-        {value: 'Available', label: 'Available'},
-        {value: 'Installed', label: 'Installed'},
-        {value: 'Damaged', label: 'Damaged'},
-        {value: 'Under Repair', label: 'Under Repair'},
-    ];
+    const statusOptions = statusAssetData.filter((status) => status.value !== 'Damaged' && status.value !=='Under Repair').map((status) => ({
+        value: status.value,
+        label: status.label,
+    }));
 
     const userOptions = users.map((user) => ({
         value: user.id,
@@ -208,6 +149,11 @@ export default function create({auth, categories,suppliers,users,departments}) {
     const departmentOptions = departments.map((department) => ({
         value: department.id,
         label: department.name,
+    }));
+
+    const sizeOptions = sizeMonitorData.map((sizeMonitor) => ({
+        value: sizeMonitor.value,
+        label: sizeMonitor.label
     }));
 
     const handleCompanyChange = (selectedOption) => {
@@ -245,7 +191,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
     const fetchLastCode = async (selectedCompany, selectedCategory, selectedBudget) => {
         if (selectedCompany && selectedCategory && selectedBudget) {
             try {
-                const response = await axios.get(`/admin/asset/lastcode/${selectedCompany}/${selectedCategory}/${selectedBudget}`);
+                const response = await axios.get(`/admin/device/lastcode/${selectedCompany}/${selectedCategory}/${selectedBudget}`);
                 const newCode = response.data;
                 setData((prevData) => ({
                     ...prevData,
@@ -285,6 +231,22 @@ export default function create({auth, categories,suppliers,users,departments}) {
         });
     };
 
+    const handleAddStorage = () => {
+        setData("storages", [...data.storages, defaultStorage]);
+    };
+      
+    const handleRemoveStorage = (index) => {
+        const updatedStorages = [...data.storages];
+        updatedStorages.splice(index, 1);
+        setData("storages", updatedStorages);
+    };
+      
+    const handleStorageChange = (index, field, value) => {
+        const updatedStorages = [...data.storages];
+        updatedStorages[index][field] = value;
+        setData("storages", updatedStorages);
+    };
+
     useEffect(() => {
         if (!data.company || !data.category_id) {
             setData((prevData) => ({
@@ -297,7 +259,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
     }, [data.company, data.category_id]);
     
     useEffect(() => {
-        if(data.category_name != 'CPU' || data.category_name != 'Notebook' || data.category_name != 'Tablet'){
+        if (!(['CPU', 'Notebook', 'Tablet'].includes(data.category_name))) {
             setData((prevData) => ({
                 ...prevData,
                 processor_type: '',
@@ -311,37 +273,196 @@ export default function create({auth, categories,suppliers,users,departments}) {
                 os_edition: '',
                 os_architecture: '',
             }));
-        }
-        
-    },[data.category_name]);
-
-    useEffect(() => {
-        if(data.status != 'Installed'){
+        }else if(data.category_name != 'Monitor'){
             setData((prevData) => ({
                 ...prevData,
-                user_id:'',
-                department_id:'',
-                name:'',
-                transaction_date:''
-            }))
-        };
-    },[data.status])
-
-    useEffect(() => {
-        if (data.status ==='Installed' && data.company && data.category_id && data.department_id) {
-            axios.get(`/admin/asset/lastname/${data.company}/${data.category_id}/${data.department_id}`)
-            .then(response => {
-                const newName = response.data;
-                setData((prevData) => ({
-                    ...prevData,
-                    name: newName.lastName,
-                }));
-            })
-            .catch(error => {
-                console.error('Error fetching last name:', error);
-            });
+                size: '',
+            }));
         }
-    }, [data.company, data.category_id, data.department_id]);
+    }, [data.category_name]);
+
+    // useEffect(() => {
+    //     if(data.status != 'Installed' || data.status != 'Replacement'){
+    //         setData((prevData) => ({
+    //             ...prevData,
+    //             user_id:'',
+    //             department_id:'',
+    //             name:'',
+    //             transaction_date:''
+    //         }))
+    //     };
+    // },[data.status])
+
+    const assetNameOptions = data.asset_name.map((asset) => ({
+        value: asset.name,
+        label: asset.name,
+    }))
+
+    // useEffect(() => {
+    //     if (['Installed', 'Replacement'].includes(data.status) && data.company && data.category_id && data.department_id) {
+    //         axios.get(`/admin/asset/lastname/${data.status}/${data.company}/${data.category_id}/${data.department_id}`)
+    //         .then(response => {
+    //             const newData = response.data;
+    //             if(data.status === 'Installed'){
+    //                 setData((prevData) => ({
+    //                     ...prevData,
+    //                     name: newData.data,
+    //                 }));
+    //             }else{
+    //                 setData((prevData) => ({
+    //                     ...prevData,
+    //                     asset_name: newData.data,
+    //                 }));
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching last name:', error);
+    //         });
+    //     }
+    // }, [data.company, data.category_id, data.department_id]);
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {};
+        if (!data.company) {
+            newErrors.company = "The company is required";
+            isValid = false;
+        }
+        if (!data.category_id) {
+            newErrors.category_id = "The category is required";
+            isValid = false;
+        }
+        if (!data.budget) {
+            newErrors.budget = "The budget is required";
+            isValid = false;
+        }
+        if (!data.category_name) {
+            newErrors.category_name = "The category name is required";
+            isValid = false;
+        }
+        if (!data.serial_number) {
+            newErrors.serial_number = "The serial number is required";
+            isValid = false;
+        }else {
+            const serialExists = assets.some((asset) => asset.serial_number === data.serial_number);
+            if (serialExists) {
+                newErrors.serial_number = "The serial number has already been taken.";
+                isValid = false;
+            }
+        }
+        if (!data.brand) {
+            newErrors.brand = "The brand is required";
+            isValid = false;
+        }
+        if (!data.description) {
+            newErrors.description = "The brand is required";
+            isValid = false;
+        }
+        if (!data.size && data.category_name === 'Monitor') {
+            newErrors.size = "The size is required";
+            isValid = false;
+        }
+        if (!data.processor_type && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.processor_type = "The processor type is required";
+            isValid = false;
+        }
+        if (!data.processor_description && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.processor_description = "The processor description is required";
+            isValid = false;
+        }
+        if (!data.ram_type && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.ram_type = "The ran type is required";
+            isValid = false;
+        }
+        if (!data.ram_capacity && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.ram_capacity = "The ram capacity is required";
+            isValid = false;
+        }
+        if (!data.vga_card && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.vga_card = "The VGA card is required";
+            isValid = false;
+        }
+        if (!data.os_type && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.os_type = "The OS type is required";
+            isValid = false;
+        }
+        if (!data.os_edition && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.os_edition = "The OS edition is required";
+            isValid = false;
+        }
+        if (!data.os_architecture && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            newErrors.os_architecture = "The OS architecture is required";
+            isValid = false;
+        }
+        if (data.os_licence && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            const osLicenceExists = assets.some((asset) => asset.os_licence === data.os_licence);
+            if (osLicenceExists) {
+                newErrors.os_licence = "The os licence has already been taken.";
+                isValid = false;
+            }
+            newErrors.purchase_date = "The purchase date is required";
+            isValid = false;
+        }
+        if (data.office_licence && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            const officeLicenceExists = assets.some((asset) => asset.office_licence === data.office_licence);
+            if (officeLicenceExists) {
+                newErrors.office_licence = "The office licence has already been taken.";
+                isValid = false;
+            }
+            newErrors.purchase_date = "The purchase date is required";
+            isValid = false;
+        }
+        if (!data.purchase_date) {
+            newErrors.purchase_date = "The purchase date is required";
+            isValid = false;
+        }
+        if (!data.price) {
+            newErrors.price = "The price is required";
+            isValid = false;
+        }
+        // if (!data.status) {
+        //     newErrors.status = "The status is required";
+        //     isValid = false;
+        // }
+        if (!data.supplier_id) {
+            newErrors.supplier_id = "The supplier is required";
+            isValid = false;
+        }
+        // if (!data.department_id && ['Installed','Replacement'].includes(data.status)) {
+        //     newErrors.department_id = "The department is required";
+        //     isValid = false;
+        // }
+        if (!data.transaction_date && ['Installed','Replacement'].includes(data.status)) {
+            newErrors.transaction_date = "The transaction date is required";
+            isValid = false;
+        }
+        // if (!data.name && ['Installed','Replacement'].includes(data.status)) {
+        //     newErrors.name = "The asset name is required";
+        //     isValid = false;
+        // }
+        // if (!data.user_id && data.status == "Installed" && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+        //     newErrors.user_id = "The user is required";
+        //     isValid = false;
+        // }
+        if (data.storages  && ['CPU', 'Notebook', 'Tablet'].includes(data.category_name)) {
+            const storageErrors = data.storages.map((storage, index) => {
+                const storageErrors = {};
+                if (!storage.storage_type) {
+                    storageErrors.storage_type = "The storage type is required";
+                    isValid = false;
+                }
+                if (!storage.storage_capacity) {
+                    storageErrors.storage_capacity = "The storage capacity is required";
+                    isValid = false;
+                }
+                return storageErrors;
+            });
+            newErrors.storages = storageErrors;
+        }
+        
+        setErrors(newErrors);
+        return isValid;
+    }
 
     const submit = (e) => {
         e.preventDefault();
@@ -352,7 +473,9 @@ export default function create({auth, categories,suppliers,users,departments}) {
             confirmButtonText: 'Save',
         }).then((result) => {
             if (result.isConfirmed) {
-                post(route('admin.asset.store'));
+                if(validateForm()){
+                    post(route('admin.device.store'));
+                }
             }
         }); 
     };
@@ -361,7 +484,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
             <Head title="Asset" />
             <div className="flex justify-center mb-10">
                 <form onSubmit={submit} className="bg-white w-full md:w-3/4 shadow-md rounded-md flex flex-col">
-                    <div className="w-full px-5 py-2 font-semibold text-rose-600 border-b">Create New Assets</div>
+                    <div className="w-full px-5 py-2 font-semibold text-rose-600 border-b">Create New Asset</div>
                     <div className="p-5">
                         <div className="mb-5 border-b pb-5 w-full grid grid-cols-3 gap-5">
                             <div className="">
@@ -400,7 +523,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                     isClearable={true}
                                     placeholder="Select Budget"
                                     className="mt-1 block"
-                                    value={budgetOptions.find(option => option.value === data.budget)}
+                                    value={budgetOptions.find(option => option.value == data.budget)}
                                     onChange={handleBudgetChange}
                                     styles={selectStyle}
                                 />
@@ -435,7 +558,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                 <InputError message={errors.serial_number} className="mt-1" />
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-5">
+                                        <div className={`grid gap-5 ${data.category_name === 'Monitor' ? 'grid-cols-3':'grid-cols-2'}`}>
                                             <div className="mb-5">
                                                 <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Brand</InputLabel>
                                                 <TextInput
@@ -447,15 +570,31 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                 <InputError message={errors.brand} className="mt-1" />
                                             </div>
                                             <div className="mb-5">
-                                                <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Description</InputLabel>
-                                                <TextInput
-                                                    placeholder="Description"
-                                                    className="w-full"
-                                                    value={data.description}
-                                                    onChange={(e) => setData('description', e.target.value)}
-                                                    />
-                                                <InputError message={errors.description} className="mt-1" />
-                                            </div>
+                                                    <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Description</InputLabel>
+                                                    <TextInput
+                                                        placeholder="Description"
+                                                        className="w-full"
+                                                        value={data.description}
+                                                        onChange={(e) => setData('description', e.target.value)}
+                                                        />
+                                                    <InputError message={errors.description} className="mt-1" />
+                                                </div>
+                                                {data.category_name === 'Monitor' && (
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Size</InputLabel>
+                                                        <Select
+                                                            name="size"
+                                                            options={sizeOptions}
+                                                            isClearable={true}
+                                                            placeholder="Select Size"
+                                                            className="mt-1 block"
+                                                            value={sizeOptions.find((option) => option.value === data.size) || null}
+                                                            onChange={selectedOption => setData('size', selectedOption ? selectedOption.value : null)}
+                                                            styles={selectStyle}
+                                                        />
+                                                        <InputError message={errors.size} className="mt-1" />
+                                                    </div>
+                                                )}
                                         </div>
                                         {(data.category_name ==='CPU' || data.category_name ==='Notebook' || data.category_name ==='Tablet') && (
                                             <div className="">
@@ -515,35 +654,54 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                         <InputError message={errors.ram_capacity} className="mt-1" />
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-5">
-                                                    <div className="mb-5">
-                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Storage Type</InputLabel>
-                                                        <Select
-                                                            name="storage_type"
-                                                            options={storageTypeOptions}
-                                                            isClearable={true}
-                                                            placeholder="Select Storage Type"
-                                                            className="mt-1 block"
-                                                            value={storageTypeOptions.find((option) => option.value === data.storage_type) || null}
-                                                            onChange={selectedOption => setData('storage_type', selectedOption ? selectedOption.value : null)}
-                                                            styles={selectStyle}
-                                                        />
-                                                        <InputError message={errors.storage_type} className="mt-1" />
+                                                <div className="">
+                                                    <div className="flex justify-between">
+                                                    <h1 className="text-gray-800 font-semibold mb-3">Storage :</h1>
+                                                        <button type="button" onClick={handleAddStorage} className="inline-flex items-center w-fit h-fit px-2 text-lg py-1 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest focus:ring-offset-2 transition ease-in-out duration-150text-white gap-1 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-600 focus:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                                            <span className="bi-plus"/>
+                                                        </button>
                                                     </div>
-                                                    <div className="mb-5">
-                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Storage Capacity</InputLabel>
-                                                        <Select
-                                                            name="storage_capacity"
-                                                            options={storageCapacityOptions}
-                                                            isClearable={true}
-                                                            placeholder="Select Storage Capacity"
-                                                            className="mt-1 block"
-                                                            value={storageCapacityOptions.find((option) => option.value === data.storage_capacity) || null}
-                                                            onChange={selectedOption => setData('storage_capacity', selectedOption ? selectedOption.value : null)}
-                                                            styles={selectStyle}
-                                                        />
-                                                        <InputError message={errors.storage_capacity} className="mt-1" />
-                                                    </div>
+                                                    {data.storages.map((storage, index) => {
+                                                        return (
+                                                        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-5 mb-3" key={index}>
+                                                            <div className="">
+                                                                <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Type {index+1}</InputLabel>
+                                                                <Select
+                                                                    name={`storages[${index}].storage_type`}
+                                                                    options={storageTypeOptions}
+                                                                    isClearable={true}
+                                                                    placeholder="Select Storage Type"
+                                                                    className="mt-1 block"
+                                                                    value={storageTypeOptions.find((option) => option.value === storage.storage_type) || null}
+                                                                    onChange={(selectedOption) => handleStorageChange(index, "storage_type", selectedOption ? selectedOption.value : null)}
+                                                                    styles={selectStyle}
+                                                                />
+                                                                
+                                                                <InputError message={errors.storages && errors.storages[index]?.storage_type} className="mt-1"/>
+                                                            </div>
+                                                            <div className="w-full flex items-center gap-3">
+                                                                <div className="w-full">
+                                                                    <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Capacity {index+1}</InputLabel>
+                                                                    <Select
+                                                                        name={`storages[${index}].storage_capacity`}
+                                                                        options={storageCapacityOptions}
+                                                                        isClearable={true}
+                                                                        placeholder="Select Storage Capacity"
+                                                                        className="mt-1 block w-full"
+                                                                        value={storageCapacityOptions.find((option) => option.value === storage.storage_capacity) || null}
+                                                                        onChange={(selectedOption) => handleStorageChange(index, "storage_capacity", selectedOption ? selectedOption.value : null)}
+                                                                        styles={selectStyle}
+                                                                    />
+                                                                    <InputError message={errors.storages && errors.storages[index]?.storage_capacity} className="mt-1"/>
+                                                                </div>
+                                                                {index!=0 && (
+                                                                    <div onClick={() => handleRemoveStorage (index)} className="mt-6 inline-flex items-center w-fit h-fit px-2 py-2 border border-transparent rounded-md font-semibold text-sm text-white uppercase cursor-pointer tracking-widest focus:ring-offset-2 transition ease-in-out duration-150text-white gap-1 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-600 focus:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 bi-trash"></div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        )
+                                                    })}
                                                 </div>
 
                                                 <div className="grid grid-cols-3 gap-5">
@@ -629,16 +787,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                             </div>
                                         )}
                                         <div className="grid grid-cols-3 gap-5">
-                                            <div className="mb-5">
-                                                <InputLabel className="mb-1">IP Address</InputLabel>
-                                                <TextInput
-                                                    placeholder="IP Address"
-                                                    className="w-full"
-                                                    value={data.ip}
-                                                    onChange={(e) => setData('ip', e.target.value)}
-                                                    />
-                                                <InputError message={errors.ip} className="mt-1" />
-                                            </div>
+                                            
                                             <div className="mb-5">
                                                 <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Purchase Date</InputLabel>
                                                 <TextInput
@@ -661,9 +810,6 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                     />
                                                 <InputError message={errors.warranty_expiry_date} className="mt-1" />
                                             </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-4 gap-5">
                                             <div className="mb-5">
                                                 <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Price</InputLabel>
                                                 <TextInput
@@ -675,6 +821,10 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                     />
                                                 <InputError message={errors.price} className="mt-1" />
                                             </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-5">
+                                            
                                             <div className="mb-5">
                                                 <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Supplier</InputLabel>
                                                 <Select
@@ -703,6 +853,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                                 <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Status</InputLabel>
                                                 <Select
                                                     name="status"
+                                                    isDisabled={true}
                                                     options={statusOptions}
                                                     isClearable={true}
                                                     placeholder="Select Status"
@@ -716,59 +867,85 @@ export default function create({auth, categories,suppliers,users,departments}) {
                                             
                                         </div>
                                         
-                                        {data.status === 'Installed' && (
-                                            <div className="grid grid-cols-4 gap-5">
-                                                <div className="mb-5">
-                                                    <InputLabel className="mb-1">User</InputLabel>
-                                                    <Select
-                                                        name="user_id"
-                                                        options={userOptions}
-                                                        isClearable={true}
-                                                        placeholder="Select User"
-                                                        className="mt-1 block"
-                                                        value={userOptions.find((option) => option.value === data.user_id) || null}
-                                                        onChange={handleUserChange}
-                                                        styles={selectStyle}
-                                                    />
-                                                    <InputError message={errors.user_id} className="mt-1" />
-                                                </div>
-                                                <div className="mb-5">
-                                                    <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Department</InputLabel>
-                                                    <Select
-                                                        name="department_id"
-                                                        options={departmentOptions}
-                                                        isClearable={true}
-                                                        placeholder="Select Department"
-                                                        className="mt-1 block"
-                                                        value={departmentOptions.find(option => option.value === data.department_id) || null}
-                                                        onChange={handleDepartmentChange}
-                                                        styles={selectStyle}
-                                                    />
-                                                    <InputError message={errors.department_id} className="mt-1" />
-                                                </div>
-                                                <div className="mb-5">
-                                                    <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Transaction Date</InputLabel>
-                                                    <TextInput
-                                                        type="date"
-                                                        placeholder="Transaction Date"
-                                                        className="w-full"
-                                                        value={data.transaction_date}
-                                                        onChange={(e) => setData('transaction_date', e.target.value)}
+                                        {(data.status === 'Installed' || data.status === 'Replacement') && (
+                                            <div className="w-full">
+                                                <div className="grid grid-cols-3 gap-5">
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1">User</InputLabel>
+                                                        <Select
+                                                            name="user_id"
+                                                            options={userOptions}
+                                                            isClearable={true}
+                                                            placeholder="Select User"
+                                                            className="mt-1 block"
+                                                            value={userOptions.find((option) => option.value === data.user_id) || null}
+                                                            onChange={handleUserChange}
+                                                            styles={selectStyle}
                                                         />
-                                                    <InputError message={errors.transaction_date} className="mt-1" />
-                                                </div>
-                                                <div className="mb-5">
-                                                    <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Asset Name</InputLabel>
-                                                    <TextInput
-                                                        placeholder="Asset Name"
-                                                        className="w-full bg-gray-100"
-                                                        value={data.name}
-                                                        disabled={true}
-                                                        onChange={(e) => setData('name', e.target.value)}
+                                                        <InputError message={errors.user_id} className="mt-1" />
+                                                    </div>
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Department</InputLabel>
+                                                        <Select
+                                                            name="department_id"
+                                                            options={departmentOptions}
+                                                            isClearable={true}
+                                                            placeholder="Select Department"
+                                                            className="mt-1 block"
+                                                            value={departmentOptions.find(option => option.value === data.department_id) || null}
+                                                            onChange={handleDepartmentChange}
+                                                            styles={selectStyle}
                                                         />
-                                                    <InputError message={errors.name} className="mt-1" />
+                                                        <InputError message={errors.department_id} className="mt-1" />
+                                                    </div>    
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1">IP Address</InputLabel>
+                                                        <TextInput
+                                                            placeholder="IP Address"
+                                                            className="w-full"
+                                                            value={data.ip}
+                                                            onChange={(e) => setData('ip', e.target.value)}
+                                                            />
+                                                        <InputError message={errors.ip} className="mt-1" />
+                                                    </div>                                                
                                                 </div>
-                                                
+                                                <div className="grid grid-cols-2 gap-5">
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Transaction Date</InputLabel>
+                                                        <TextInput
+                                                            type="date"
+                                                            placeholder="Transaction Date"
+                                                            className="w-full"
+                                                            value={data.transaction_date}
+                                                            onChange={(e) => setData('transaction_date', e.target.value)}
+                                                            />
+                                                        <InputError message={errors.transaction_date} className="mt-1" />
+                                                    </div>
+                                                    <div className="mb-5">
+                                                        <InputLabel className="mb-1 after:content-['*'] after:ml-0.5 after:text-red-500">Asset Name</InputLabel>
+                                                        {data.status === 'Installed' ? (
+                                                            <TextInput
+                                                                placeholder="Asset Name"
+                                                                className="w-full bg-gray-100"
+                                                                value={data.name}
+                                                                disabled={true}
+                                                                onChange={(e) => setData('name', e.target.value)}
+                                                                />
+                                                        ):(
+                                                            <Select
+                                                                name="name"
+                                                                options={assetNameOptions}
+                                                                isClearable={true}
+                                                                placeholder="Select Asset Name"
+                                                                className="mt-1 block"
+                                                                value={assetNameOptions.find(option => option.value === data.name) || null}
+                                                                onChange={(selectedOption) => setData('name', selectedOption ? selectedOption.value : null)}
+                                                                styles={selectStyle}
+                                                            />
+                                                        )}
+                                                        <InputError message={errors.name} className="mt-1" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -781,7 +958,7 @@ export default function create({auth, categories,suppliers,users,departments}) {
                     </div>
 
                     <div className="w-full bg-gray-100 px-5 py-2 flex items-center space-x-3 justify-end">
-                        <Link href={route('admin.asset.index')} className="gap-1 bg-gray-500 hover:bg-gray-600 active:bg-gray-600 focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <Link href={route('admin.device.index')} className="gap-1 bg-gray-500 hover:bg-gray-600 active:bg-gray-600 focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
                             <span className="bi-x-lg"/>
                             <span>Cancel</span>
                         </Link>

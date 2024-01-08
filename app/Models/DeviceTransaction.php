@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AssetTransaction extends Model
+class DeviceTransaction extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -15,7 +15,11 @@ class AssetTransaction extends Model
         'name',
         'transaction_date',
         'status',
-        'asset_id',
+        'note',
+        'ip',
+        'active',
+        'number',
+        'device_id',
         'user_id',
         'department_id',
     ];
@@ -35,9 +39,9 @@ class AssetTransaction extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function asset(): BelongsTo
+    public function device(): BelongsTo
     {
-        return $this->belongsTo(Asset::class);
+        return $this->belongsTo(Device::class);
     }
 
     /**
@@ -49,4 +53,5 @@ class AssetTransaction extends Model
     {
         return $this->belongsTo(Department::class);
     }
+    
 }

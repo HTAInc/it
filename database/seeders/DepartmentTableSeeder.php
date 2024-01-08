@@ -42,6 +42,10 @@ class DepartmentTableSeeder extends Seeder
                 'name' => 'PPIC',
                 'code' => 'PPC',
             ],
+            [
+                'name' => 'Production',
+                'code' => 'PRO',
+            ],
         ];
 
         foreach($departments as $department) {

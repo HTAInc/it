@@ -3,13 +3,13 @@ import FlashMessage from "@/Components/FlashMessage";
 import IconButton from "@/Components/IconButton";
 import Link from "@/Components/Link";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import { useState } from "react";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 
-export default function Index({auth,categories, flashMessage}) {
-    const { get, delete: destroy } = useForm();
+export default function Index({auth,users,flashMessage}) {
+    const { get,delete: destroy } = useForm();
     const [filterText, setFilterText] = useState('');
     
     const handleFilter = e => {
@@ -20,14 +20,12 @@ export default function Index({auth,categories, flashMessage}) {
         setFilterText('');
     };
 
-    const filteredData = categories.filter(item =>
-        item.type.toLowerCase().includes(filterText.toLowerCase()) ||
-        item.name.toLowerCase().includes(filterText.toLowerCase()) ||
-        item.code.toLowerCase().includes(filterText.toLowerCase())
+    const filteredData = users.filter(item =>
+        item.name.toLowerCase().includes(filterText.toLowerCase())
     );
 
     const handleEdit = (id) => {
-        get(route('admin.category.edit',id));
+        get(route('admin.user.edit',id));
     }
 
     function handleDelete(id) {
@@ -40,7 +38,7 @@ export default function Index({auth,categories, flashMessage}) {
             denyButtonText: 'Hapus',
         }).then((result) => {
             if (result.isDenied) {
-                destroy(route('admin.category.destroy',id))
+                destroy(route('admin.user.destroy',id))
             }
         });
     };
@@ -51,32 +49,28 @@ export default function Index({auth,categories, flashMessage}) {
             selector: (_, index) => index + 1,
         },
         {
-            name:'Type',
-            selector:row => row.type,
-            cell: row => (
-                <div className={`text-white px-3 py-1 uppercase rounded text-xs ${row.type === 'ASSET' ? 'bg-rose-500':'bg-sky-500'}`}>{row.type}</div>
-            ),
-            sortable: true,
-        },
-        {
             name:'Name',
             selector:row => row.name,
             sortable: true,
         },
         {
-            name:'Code',
-            selector:row => row.code,
+            name:'Email',
+            selector:row => row.email || '-',
             sortable: true,
         },
         {
-            name:'Installed to PC',
-            center:true,
-            selector:row => row.installed_to_pc,
-            cell: row => row.installed_to_pc ? (
-                <div className="text-lg text-emerald-600 bi-check-lg"></div>
-            ):(
-                <div className="text-lg text-rose-600 bi-x-lg"></div>
-            ),
+            name:'Department',
+            selector:row => row.department?.name || '-',
+            sortable: true,
+        },
+        {
+            name:'Section',
+            selector:row => row.section?.name || '-',
+            sortable: true,
+        },
+        {
+            name:'Role',
+            selector:row => row.roles[0].name,
             sortable: true,
         },
         {
@@ -93,20 +87,20 @@ export default function Index({auth,categories, flashMessage}) {
     ]
     return (
         <Authenticated user={auth.user}>
-            <Head title="Category" />
+            <Head title="user" />
             {flashMessage?.message && (
                 <FlashMessage message={flashMessage.message} type={flashMessage.type}/>
             )}
             <div className="w-full">
                 <div className="flex justify-between mb-3">
-                    <Link href={route('admin.category.create')} className="bg-rose-500 hover:bg-rose-600 focus:bg-rose-600 active:bg-rose-600 focus:ring-rose-500">
+                    <Link href={route('admin.user.create')} className="bg-rose-500 hover:bg-rose-600 focus:bg-rose-600 active:bg-rose-600 focus:ring-rose-500">
                         <span className="bi-plus-lg"/>Add
                     </Link>
                     <Filter filterText={filterText} onFilter={handleFilter} onClear={handleClear}/>
                 </div>
                 <div className="bg-white p-3">
                     <DataTable
-                        title="Category"
+                        title="user"
                         data={filteredData}
                         columns={columns}
                         pagination

@@ -12,7 +12,7 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable =[
-        'name','code','thumbnail',
+        'type','name','code','installed_to_pc','thumbnail',
     ];
 
     /**

@@ -4,9 +4,11 @@ import '../css/app.css';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { PrimeReactProvider } from 'primereact/api'; // Impor PrimeReactProvider
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
+import { DataProvider } from './Utility/DataProvider';
+
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -15,8 +17,10 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(
-            <PrimeReactProvider> {/* Letakkan PrimeReactProvider di sini */}
-                <App {...props} />
+            <PrimeReactProvider>
+                <DataProvider>
+                    <App {...props} />
+                </DataProvider>
             </PrimeReactProvider>
         );
     },

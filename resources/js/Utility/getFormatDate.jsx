@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 
-export const getFormatDate = (dateString, formatString = 'dd-MMM-yyyy') => {
+export const getFormatDate = (dateString, formatString = 'dd-MM-yyyy') => {
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {

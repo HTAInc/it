@@ -1,11 +1,17 @@
 <?php
 
 use App\Http\Controllers\Admin\AssetController;
+use App\Http\Controllers\Admin\AssetTransactionController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DeviceController;
+use App\Http\Controllers\Admin\DeviceTransactionController;
+use App\Http\Controllers\Admin\DowntimeController;
 use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\UserContoller;
+use App\Http\Controllers\Admin\WorkOrderController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -28,14 +34,21 @@ Route::get('user', function() {
 
 Route::prefix('admin')->middleware(['role:admin'])->name('admin.')->group(function() {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('/user', UserContoller::class);
     Route::resource('/category', CategoryController::class);
     Route::resource('/department', DepartmentController::class);
     Route::resource('/section', SectionController::class);
     Route::resource('/supplier', SupplierController::class);
-    Route::resource('/asset', AssetController::class);
-    Route::get('/asset/lastcode/{company}/{category}/{budget}', [AssetController::class, 'getLastCode']);
-    Route::get('/asset/lastname/{company}/{category}/{department}', [AssetController::class, 'getLastName']);
+    Route::resource('/device', DeviceController::class);
+    Route::get('/device/lastcode/{company}/{category}/{budget}', [DeviceController::class, 'getLastCode']);
+    Route::get('/device/lastname/{status}/{company}/{category}/{department}', [DeviceController::class, 'getLastName']);
+    Route::resource('/deviceTransaction', DeviceTransactionController::class);
+    Route::resource('/downtime', DowntimeController::class);
+    Route::resource('/work-order', WorkOrderController::class);
+    Route::get('/work-order/take/{id}', [WorkOrderController::class,'take'])->name('workOrder.take'); 
 });
+
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

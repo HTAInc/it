@@ -31,8 +31,18 @@ class Department extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function assetTransaction(): HasMany
+    public function deviceTransaction(): HasMany
     {
-        return $this->hasMany(AssetTransaction::class);
+        return $this->hasMany(DeviceTransaction::class);
+    }
+
+    /**
+     * Get all of the users for the Department
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 }

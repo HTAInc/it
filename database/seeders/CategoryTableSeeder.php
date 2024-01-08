@@ -15,24 +15,39 @@ class CategoryTableSeeder extends Seeder
     {
         $categories = [
             [
+                'type' => 'ASSET',
                 'name' => 'Printer',
                 'code' => 'PR'
             ],
             [
+                'type' => 'ASSET',
                 'name' => 'CPU',
                 'code' => 'PC'
             ],
             [
+                'type' => 'ASSET',
                 'name' => 'Monitor',
                 'code' => 'MT'
             ],
             [
+                'type' => 'ASSET',
                 'name' => 'Notebook',
                 'code' => 'NB'
             ],
             [
+                'type' => 'ASSET',
                 'name' => 'Tablet',
                 'code' => 'TB'
+            ],
+            [
+                'type' => 'SUPPORT',
+                'name' => 'Mouse',
+                'code' => 'MS'
+            ],
+            [
+                'type' => 'SUPPORT',
+                'name' => 'Keyboard',
+                'code' => 'KB'
             ],
         ];
 

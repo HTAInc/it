@@ -15,7 +15,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::orderBy('type')->get();
         return Inertia::render('Admin/Category/Index',[
             'categories'=>$categories
         ]);
@@ -34,9 +34,12 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // return $request->all();
         $data = $request->validate([
+            'type' => 'required|string|max:255',
             'name' => 'required|string|max:255|unique:categories,name',
             'code' => 'required|string|max:255|unique:categories,code',
+            'installed_to_pc' => 'required|boolean',
         ]);
 
         Category::create($data);
@@ -73,6 +76,7 @@ class CategoryController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'code' => 'required|string|max:255|unique:categories,code,' . $category->id,
+            'installed_to_pc' => 'required|boolean',
         ]);
         $category->update($data);
 

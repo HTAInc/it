@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('asset_storages', function (Blueprint $table) {
             $table->id();
-            $table->enum('type',['ASSET','SUPPORT']);
-            $table->string('name',25)->unique()->nullable();
-            $table->string('code')->nullable();
-            $table->boolean('installed_to_pc')->default(false);
-            $table->string('thumbnail')->nullable();
+            $table->string('storage_type')->nullable();
+            $table->string('storage_capacity')->nullable();
+            $table->unsignedBigInteger('device_id')->nullable();
+            $table->foreign('device_id')->references('id')->on('devices')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
             $table->softDeletes();
-
-            $table->index('name');
         });
     }
 
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('asset_storages');
     }
 };
